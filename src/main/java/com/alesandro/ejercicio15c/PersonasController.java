@@ -87,7 +87,7 @@ public class PersonasController {
             if (lst.contains(p)) {
                 alerta("Esa persona ya existe");
             } else {
-                tabla.getItems().addAll(p);
+                tabla.getItems().add(p);
                 confirmacion("Persona añadida correctamente");
                 vaciarFormulario();
             }
