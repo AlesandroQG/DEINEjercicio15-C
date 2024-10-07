@@ -1,5 +1,7 @@
 package com.alesandro.ejercicio15c;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -40,20 +42,30 @@ public class PersonasController {
      * Función que se ejecuta cuando se inicia la ventana
      */
     public void initialize() {
+        // Modificar las celdas de la tabla
         colNombre.setCellValueFactory(new PropertyValueFactory("nombre"));
         colApellidos.setCellValueFactory(new PropertyValueFactory("apellidos"));
         colEdad.setCellValueFactory(new PropertyValueFactory("edad"));
-
         tabla.getColumns().setAll(colNombre, colApellidos, colEdad);
+        // Añadir listener para cuando se selecciona un item de la tabla
+        tabla.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Persona>() {
+            @Override
+            public void changed(ObservableValue<? extends Persona> observableValue, Persona oldValue, Persona newValue) {
+                if (newValue != null) {
+                    txtNombre.setText(newValue.getNombre());
+                    txtApellidos.setText(newValue.getApellidos());
+                    txtEdad.setText(newValue.getEdad() + "");
+                }
+            }
+        });
     }
 
     /**
-     * Función que procesa los datos cuándo se pulsa el botón "Agregar Persona"
+     * Válida los datos del formulario
      *
-     * @param event
+     * @return si los datos son validos o no
      */
-    @FXML
-    void agregar(ActionEvent event) {
+    private boolean validarDatos() {
         String error = "";
         if (txtNombre.getText().isEmpty()) {
             error += "El campo nombre es obligatorio";
@@ -81,7 +93,20 @@ public class PersonasController {
         }
         if (!error.isEmpty()) {
             alerta(error);
-        } else {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Función que procesa los datos cuándo se pulsa el botón "Agregar Persona"
+     *
+     * @param event
+     */
+    @FXML
+    void agregar(ActionEvent event) {
+        boolean resultado = validarDatos();
+        if (resultado) {
             Persona p = new Persona(txtNombre.getText(), txtApellidos.getText(), Integer.parseInt(txtEdad.getText()));
             ObservableList<Persona> lst = tabla.getItems();
             if (lst.contains(p)) {
@@ -105,7 +130,22 @@ public class PersonasController {
         if (tsm.isEmpty()) {
             alerta("Tienes que seleccionar una fila");
         } else {
-
+            boolean resultado = validarDatos();
+            if (resultado) {
+                Persona p2 = new Persona(txtNombre.getText(), txtApellidos.getText(), Integer.parseInt(txtEdad.getText()));
+                ObservableList<Persona> lst = tabla.getItems();
+                if (lst.contains(p2)) {
+                    alerta("Esa persona ya existe");
+                } else {
+                    Persona p = tsm.getSelectedItem();
+                    p.setNombre(txtNombre.getText());
+                    p.setApellidos(txtApellidos.getText());
+                    p.setEdad(Integer.parseInt(txtEdad.getText()));
+                    tabla.refresh();
+                    confirmacion("Actualizada persona correctamente");
+                    vaciarFormulario();
+                }
+            }
         }
     }
 
@@ -159,11 +199,14 @@ public class PersonasController {
         alerta.showAndWait();
     }
 
+    /**
+     * Vacía el formulario y de-selecciona los elementos de la tabla
+     */
     public void vaciarFormulario() {
         tabla.getSelectionModel().clearSelection();
-        txtNombre.setText(null);
-        txtApellidos.setText(null);
-        txtEdad.setText(null);
+        txtNombre.setText("");
+        txtApellidos.setText("");
+        txtEdad.setText("");
     }
 
 }

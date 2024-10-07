@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Clase donde se ejecuta la aplicación principal
+ * Clase donde se ejecuta la ap licación principal
  *
  * @author alesandroquirosgobbato
  */
